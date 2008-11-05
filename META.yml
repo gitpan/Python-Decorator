@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Python-Decorator
-version:             0.01
+version:             0.02
 abstract:            Function composition at compile-time
 license:             ~
 author:              

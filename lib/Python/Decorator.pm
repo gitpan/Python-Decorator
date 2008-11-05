@@ -2,7 +2,7 @@
 #
 #   Python::Decorator - Python decorators for Perl5
 #
-#   $Id: Decorator.pm,v 1.4 2008-11-05 14:12:43 erwan Exp $
+#   $Id: Decorator.pm,v 1.5 2008-11-05 20:14:12 erwan Exp $
 #
 
 package Python::Decorator;
@@ -16,7 +16,7 @@ use PPI::Find;
 use PPI::Token::Word;
 use Filter::Util::Call;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # import - just call filter_add from Filter::Util::Call
 sub import {
@@ -190,13 +190,23 @@ Python::Decorator - Function composition at compile-time
 
 =head1 SYNOPSIS
 
+    use Python::Decorator;
+
+    # the 2 lines above 'sub incr' are Python-style decorators.
+    # they add memoizing and debugging behaviors to incr()
+
+    @memoize         # decorator without arguments
+    @debug("incr")   # decorator with arguments
+    sub incr {
+	return $_[0]+1;
+    }
+
+=head1 DETAILED SYNOPSIS
+
 This code:
 
     use Python::Decorator;
-    [...]
 
-    # add memoization to incr(). note the python-ish syntax with the
-    # absence of ';' after the decorator
     @memoize
     sub incr {
 	return $_[0]+1;
@@ -213,15 +223,17 @@ is really just the same as this one:
 
 In fact, the syntax:
 
-    @memoize
-    sub incr {
+    @foo
+    sub bar {
 
-reads as: "before compiling C<incr()>, redefine C<incr()> to be the
-function resulting from the composition of the function returned by
-C<memoize()> applied to C<incr()>".
+reads as: "upon compiling C<bar()>, redefine C<bar()> to be the
+function returned by C<foo(&bar)>. Or in functional programming
+terms, replace C<bar> by the composition of C<foo o bar>.
 
-The function C<memoize()> takes a function to decorate and returns the
-new decorated function.
+The function C<foo()> is called a decorator because it 'decorates'
+C<bar> by adding some new behavior to it. C<foo> is a higher order
+function: it takes a function to decorate and returns the new
+decorated function.
 
 As in Python, you can pass arguments to the decorator:
 
@@ -241,12 +253,11 @@ becomes:
 
 Notice that a decorator that takes arguments does not behave in the
 same way as one that takes no arguments. In the case above, the
-function C<mylog()> takes some arguments and returns a new no-argument
-decorator, ie a function that takes a function to decorate and returns
-the new decorated function. Though surprising at first, this behavior
-is the same as in Python.
+function C<mylog()> takes some arguments and returns a function that
+acts as a no argument decorator.
 
-As in Python, you can apply multiple decorators to one subroutine:
+As in Python, you can apply multiple decorators to one subroutine,
+hence composing multiple functions in one:
 
     # replace incr by proxify(mylog(memoize(incr)))
     @proxify
@@ -272,30 +283,58 @@ source, call it with:
 
 =head1 DESCRIPTION
 
-Decorators are syntax sugar for function composition at compile-time.
+Decorators are syntax sugar for function composition at
+compile-time.
+
+That's it, really. But despite this apparent simplicity, decorators
+enable powerfull expressions by enabling a more functional approach to
+programming.
 
 Decorators were introduced in Python 2.4 (end of 2004) and have proven
-since to provide functionality close to that of LISP macros. For a
-complete description of decorators, ask google.
+since to provide functionality close to that of macros in LISP. There
+are also related to aspect oriented programming (AOP), though AOP can
+be seen as a special use case for decorators. For a complete
+description of Python decorators, ask google or check out the links in
+the 'SEE ALSO' section.
+
+Notice that our decorators are not related in any way to the design
+pattern of the same name.
 
 Python::Decorator implements the decorator syntax for Perl5, using
-exactly the same syntax as in Python. It is a source filter, meaning
-it manipulates source code before compilation. Decorated subroutines
-are therefore composed at compile-time.
+exactly the same syntax as in Python. A decorator therefore looks like
+either one of:
+
+    @<decorator-sub>
+    sub decorated-sub {}
+
+or
+
+    @<decorator-sub>(@some,@perl,%arguments)
+    sub decorated-sub {}
+
+where C<< <decorator-sub> >> is the name of a subroutine that will
+decorate the subroutine C<decorated-sub>. The C<@> marks the beginning
+of a decorator expression. The decorator expression ends without ';'
+and the decorator arguments (if any) are usual Perl arguments.
+
+Python::Decorator is a source filter, meaning it manipulates source
+code before compilation. Subroutines are therefore decorated at
+compile-time.
 
 This module is a proof-of-concept in at least 2 ways:
 
 =over 4
 
-=item * There is no consensus as to which syntax macros or function
+=item * There is no consensus as to what syntax macros or function
 composition should have in Perl. Therefore Python::Decorator
 implements decorators using Python's own syntax instead of trying to
-introduce a more perlish syntax. If this module proves usefull,
+introduce an arbitrary perlish syntax. If this module proves usefull,
 someone will have to clone it into something more perlish.
 
-=item * This module experiments using PPI to parse Perl5 source code
-within a source filter. Though this is a slow and somewhat unstable
-technic, I believe it's a way to go to get macros working in Perl.
+=item * This module experiments using PPI to parse and modify Perl5
+source code within a source filter. Though this is a slow and somewhat
+unstable technique, I believe it is a way to go to get macros working
+in Perl.
 
 =back
 
@@ -318,14 +357,18 @@ Use in production code is REALLY NOT RECOMMENDED!
 =head1 SEE ALSO
 
 See PPI, Filter::Util::Call, Aspect.
+About Python decorators, see:
+
+    http://www.phyast.pitt.edu/~micheles/python/documentation.html
+    http://www.artima.com/weblogs/viewpost.jsp?thread=240808
 
 =head1 BUGS
 
-See PPI. Otherwise, report to the author!
+Check first whether it is a PPI issue. Otherwise, report to the author!
 
 =head1 VERSION
 
-$Id: Decorator.pm,v 1.4 2008-11-05 14:12:43 erwan Exp $
+$Id: Decorator.pm,v 1.5 2008-11-05 20:14:12 erwan Exp $
 
 =head1 AUTHORS
 
