@@ -2,7 +2,7 @@
 #
 #   Python::Decorator - Python decorators for Perl5
 #
-#   $Id: Decorator.pm,v 1.5 2008-11-05 20:14:12 erwan Exp $
+#   $Id: Decorator.pm,v 1.6 2008-11-05 20:56:42 erwan Exp $
 #
 
 package Python::Decorator;
@@ -16,7 +16,7 @@ use PPI::Find;
 use PPI::Token::Word;
 use Filter::Util::Call;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # import - just call filter_add from Filter::Util::Call
 sub import {
@@ -368,7 +368,7 @@ Check first whether it is a PPI issue. Otherwise, report to the author!
 
 =head1 VERSION
 
-$Id: Decorator.pm,v 1.5 2008-11-05 20:14:12 erwan Exp $
+$Id: Decorator.pm,v 1.6 2008-11-05 20:56:42 erwan Exp $
 
 =head1 AUTHORS
 

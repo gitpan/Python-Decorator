@@ -5,3 +5,6 @@ Revision history for Perl extension Python::Decorator
 
 0.02  2008-11-05
         - better pod
+
+0.03  2008-11-05
+        - fixing lost revision
